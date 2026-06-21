@@ -1,0 +1,99 @@
+const express = require("express");
+const app = express();
+const dotenv = require("dotenv");
+const cors = require("cors");
+dotenv.config();
+const PORT = process.env.PORT;
+
+const { MongoClient, ServerApiVersion } = require("mongodb");
+
+app.use(cors());
+app.use(express.json());
+
+const uri = process.env.DATABASE_NAME;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    //await client.connect();
+    // Send a ping to confirm a successful connection
+    //await client.db("admin").command({ ping: 1 });
+
+    const db = client.db("Assignment-10");
+    const lawyersCollection = db.collection("lawyers");
+
+    app.get("/api/lawyer", async (req, res) => {
+      const search = req.query.search;
+      const specialization = req.query.specialization;
+      const location = req.query.location;
+      const query = {};
+      if (search) {
+        query.name = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+      if (specialization) {
+        query.specialization = { $in: specialization.split(",") };
+      }
+      if (location) {
+        query.location = location;
+      }
+      const result = await lawyersCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.post("/api/lawyer", async (req, res) => {
+      const {
+        name,
+        email,
+        image,
+        specialization,
+        bio,
+        fee,
+        status,
+        location,
+        experience,
+        totalHires,
+        createdAt,
+      } = req.body;
+      const addData = {
+        name,
+        email,
+        image,
+        specialization,
+        bio,
+        fee,
+        status: "available",
+        location,
+        experience,
+        totalHires,
+        createdAt: new Date(),
+      };
+      const result = await lawyersCollection.insertOne(addData);
+      res.send(result);
+    });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!",
+    );
+  } finally {
+    // Ensures that the client will close when you finish/error
+    //await client.close();
+  }
+}
+run().catch(console.dir);
+
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+app.listen(PORT, (req, res) => {
+  console.log(`Server running on port ${PORT}`);
+});
