@@ -51,34 +51,17 @@ async function run() {
       const result = await lawyersCollection.find(query).toArray();
       res.send(result);
     });
+    app.get("/api/lawyer/:email", async (req, res) => {
+      const { email } = req.params;
+
+      const result = await lawyersCollection.findOne({ email: email });
+      res.send(result);
+    });
+
     app.post("/api/lawyer", async (req, res) => {
-      const {
-        name,
-        email,
-        image,
-        specialization,
-        bio,
-        fee,
-        status,
-        location,
-        experience,
-        totalHires,
-        createdAt,
-      } = req.body;
-      const addData = {
-        name,
-        email,
-        image,
-        specialization,
-        bio,
-        fee,
-        status: "available",
-        location,
-        experience,
-        totalHires,
-        createdAt: new Date(),
-      };
-      const result = await lawyersCollection.insertOne(addData);
+      const data = req.body;
+
+      const result = await lawyersCollection.insertOne(data);
       res.send(result);
     });
     console.log(
