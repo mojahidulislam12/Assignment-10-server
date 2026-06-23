@@ -51,6 +51,14 @@ async function run() {
       const result = await lawyersCollection.find(query).toArray();
       res.send(result);
     });
+
+    app.get("/api/single-lawyer/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await lawyersCollection.findOne(query);
+      res.send(result);
+    });
+
     app.patch("/api/lawyer/:id", async (req, res) => {
       const { id } = req.params;
 
