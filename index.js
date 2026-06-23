@@ -5,7 +5,7 @@ const cors = require("cors");
 dotenv.config();
 const PORT = process.env.PORT;
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 app.use(cors());
 app.use(express.json());
@@ -51,9 +51,21 @@ async function run() {
       const result = await lawyersCollection.find(query).toArray();
       res.send(result);
     });
+    app.patch("/api/lawyer/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const updateData = req.body;
+      const result = await lawyersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: updateData,
+        },
+      );
+      res.send(result);
+    });
     app.get("/api/lawyer/:email", async (req, res) => {
       const { email } = req.params;
-
+      console.log(email);
       const result = await lawyersCollection.findOne({ email: email });
       res.send(result);
     });
@@ -64,6 +76,7 @@ async function run() {
       const result = await lawyersCollection.insertOne(data);
       res.send(result);
     });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
