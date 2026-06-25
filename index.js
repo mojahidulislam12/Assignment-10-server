@@ -30,6 +30,34 @@ async function run() {
 
     const db = client.db("Assignment-10");
     const lawyersCollection = db.collection("lawyers");
+    const usersCollection = db.collection("user");
+    const lawyerApplicationCollection = db.collection("applications");
+
+    //User Related Api
+    app.get("/api/user/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+    app.patch("/api/user/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const updateData = req.body;
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: updateData,
+        },
+      );
+      res.send(result);
+    });
+    app.get("/api/user", async (req, res) => {
+      const id = req.body;
+      //const _id = { _id: new ObjectId(id) };
+      const result = await usersCollection.find(id).toArray();
+      res.send(result);
+    });
 
     app.get("/api/lawyer", async (req, res) => {
       const search = req.query.search;
@@ -81,7 +109,17 @@ async function run() {
     app.post("/api/lawyer", async (req, res) => {
       const data = req.body;
 
-      const result = await lawyersCollection.insertOne(data);
+      const result = await lawyersCollection.insertOne({
+        ...data,
+        status: "pending",
+      });
+      res.send(result);
+    });
+
+    //Application related api
+    app.post("/api/application", async (req, res) => {
+      const application = req.body;
+      const result = await lawyerApplicationCollection.insertOne(application);
       res.send(result);
     });
 
