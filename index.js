@@ -34,6 +34,12 @@ async function run() {
     const lawyerApplicationCollection = db.collection("applications");
 
     //User Related Api
+    app.delete("/api/user/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
     app.get("/api/user/:id", async (req, res) => {
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
@@ -54,7 +60,7 @@ async function run() {
     });
     app.get("/api/user", async (req, res) => {
       const id = req.body;
-      //const _id = { _id: new ObjectId(id) };
+
       const result = await usersCollection.find(id).toArray();
       res.send(result);
     });
@@ -77,6 +83,12 @@ async function run() {
         query.location = location;
       }
       const result = await lawyersCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/api/lawyer", async (req, res) => {
+      const id = req.body;
+
+      const result = await lawyersCollection.find(id).toArray();
       res.send(result);
     });
 
@@ -117,9 +129,43 @@ async function run() {
     });
 
     //Application related api
+    app.get("/api/application", async (req, res) => {
+      const query = {};
+      if (req.query.clientId) {
+        query.clientId = req.query.clientId;
+      }
+      if (req.query.lawyerId) {
+        query.lawyerId = req.query.lawyerId;
+      }
+      const cursor = lawyerApplicationCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     app.post("/api/application", async (req, res) => {
       const application = req.body;
       const result = await lawyerApplicationCollection.insertOne(application);
+      res.send(result);
+    });
+    app.get("/api/application", async (req, res) => {
+      const id = req.body;
+
+      const result = await lawyerApplicationCollection.find(id).toArray();
+      res.send(result);
+    });
+
+    app.patch("/api/application/:id", async (req, res) => {
+      const id = req.params.id;
+      const updataApplication = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: updataApplication.status,
+        },
+      };
+      const result = await lawyerApplicationCollection.updateOne(
+        filter,
+        updatedDoc,
+      );
       res.send(result);
     });
 
