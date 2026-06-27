@@ -152,6 +152,22 @@ async function run() {
       const result = await lawyerApplicationCollection.find(id).toArray();
       res.send(result);
     });
+    //
+    app.get("/api/application/:id", async (req, res) => {
+      const id = req.params;
+
+      const result = await lawyerApplicationCollection.find(id).toArray();
+      res.send(result);
+    });
+
+    app.get("/api/application/:email", async (req, res) => {
+      const { email } = req.params;
+
+      const result = await lawyerApplicationCollection
+        .find({ email: email })
+        .toArray();
+      res.send(result);
+    });
 
     app.patch("/api/application/:id", async (req, res) => {
       const id = req.params.id;
