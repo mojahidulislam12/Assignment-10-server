@@ -64,7 +64,7 @@ async function run() {
       const result = await usersCollection.find(id).toArray();
       res.send(result);
     });
-
+    //Lawyer related api
     app.get("/api/lawyer", async (req, res) => {
       const search = req.query.search;
       const specialization = req.query.specialization;
