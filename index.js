@@ -14,6 +14,11 @@ app.use(
 );
 app.use(express.json());
 
+const logger = (req, res, next) => {
+  console.log("LOger");
+  next();
+};
+
 const uri = process.env.DATABASE_NAME;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,9 +41,30 @@ async function run() {
     const lawyersCollection = db.collection("lawyers");
     const usersCollection = db.collection("user");
     const lawyerApplicationCollection = db.collection("applications");
+    const subscriptionsCollection = db.collection("subscriptions");
+
+    //SubScription related api
+    app.post("/subscription", async (req, res) => {
+      const { sessionId, userId, priceId } = req.body;
+      const isExist = await subscriptionsCollection.findOne({ sessionId });
+      if (isExist) {
+        return res.json({ Message: "Already exist!" });
+      }
+      const result = await subscriptionsCollection.insertOne({
+        sessionId,
+        userId,
+        priceId,
+      });
+      //update user role
+      await usersCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: { plan: "pro" } },
+      );
+      res.send({ message: "Payment Successfully" });
+    });
 
     //User Related Api
-    app.delete("/api/user/:id", async (req, res) => {
+    app.delete("/api/user/:id", logger, async (req, res) => {
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
